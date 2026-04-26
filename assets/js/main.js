@@ -4,9 +4,9 @@
 
 /* ---- Navbar: scroll effect + mobile toggle ---- */
 (function () {
-  const navbar    = document.getElementById('navbar');
+  const navbar = document.getElementById('navbar');
   const navToggle = document.getElementById('navToggle');
-  const navLinks  = document.getElementById('navLinks');
+  const navLinks = document.getElementById('navLinks');
 
   if (navbar) {
     window.addEventListener('scroll', function () {
@@ -57,8 +57,8 @@
 
 /* ---- Package pre-selection from URL param ---- */
 (function () {
-  const params  = new URLSearchParams(window.location.search);
-  const pkg     = params.get('package');
+  const params = new URLSearchParams(window.location.search);
+  const pkg = params.get('package');
   if (!pkg) return;
 
   const radio = document.querySelector('input[name="package"][value="' + pkg + '"]');
@@ -95,14 +95,14 @@
 
 /* ---- Booking form validation & submission ---- */
 (function () {
-  const form    = document.getElementById('bookingForm');
+  const form = document.getElementById('bookingForm');
   const formCard = document.getElementById('formCard');
-  const success  = document.getElementById('successMessage');
+  const success = document.getElementById('successMessage');
   if (!form) return;
 
   function showError(fieldId, errorId, show) {
     const field = document.getElementById(fieldId);
-    const err   = document.getElementById(errorId);
+    const err = document.getElementById(errorId);
     if (!field || !err) return;
     if (show) {
       field.classList.add('error');
@@ -194,7 +194,7 @@
 
     // Package
     const packageSelected = document.querySelector('input[name="package"]:checked');
-    const packageError    = document.getElementById('packageError');
+    const packageError = document.getElementById('packageError');
     if (!packageSelected) {
       if (packageError) packageError.classList.add('visible');
       valid = false;
@@ -206,7 +206,7 @@
   }
 
   // Live validation: clear errors on input/change
-  ['fullName','email','phone','eventType','venue','eventDate','eventTime','duration'].forEach(function (id) {
+  ['fullName', 'email', 'phone', 'eventType', 'venue', 'eventDate', 'eventTime', 'duration'].forEach(function (id) {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener('input', function () {
@@ -238,14 +238,73 @@
     // Simulate submission (replace with real fetch/API call as needed)
     const submitBtn = document.getElementById('submitBtn');
     if (submitBtn) {
-      submitBtn.textContent = 'Sending...';
+      submitBtn.textContent = 'Redirecting...';
       submitBtn.disabled = true;
     }
 
-    setTimeout(function () {
-      if (formCard) formCard.style.display = 'none';
-      if (success)  success.classList.add('visible');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 800);
+    // Gather booking details
+    const fullName = document.getElementById('fullName').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+
+    const companyInput = document.getElementById('company');
+    const company = companyInput ? companyInput.value.trim() : '';
+
+    function getSelectedText(selectId) {
+      const el = document.getElementById(selectId);
+      return el && el.selectedIndex > 0 ? el.options[el.selectedIndex].text : '';
+    }
+
+    const eventType = getSelectedText('eventType');
+    const venue = document.getElementById('venue').value.trim();
+    const eventDate = document.getElementById('eventDate').value;
+    const eventTime = document.getElementById('eventTime').value;
+    const duration = getSelectedText('duration');
+
+    const packageEl = document.querySelector('input[name="package"]:checked');
+    const pkg = packageEl ? packageEl.value : '';
+    let packageName = pkg;
+    if (pkg === 'basic') packageName = 'Package Kahwin A (RM550)';
+    else if (pkg === 'standard') packageName = 'Package Kahwin B (RM750)';
+    else if (pkg === 'premium') packageName = 'Open Event (RM150/hr)';
+
+    const addonsElements = document.querySelectorAll('input[name="addons"]:checked');
+    let addons = [];
+    addonsElements.forEach(function (el) {
+      if (el.value === 'coordinator') addons.push('Event Coordinator / Floor Manager');
+      if (el.value === 'djcrew') addons.push('DJ Crew');
+    });
+    const addonsText = addons.length > 0 ? addons.join(', ') : 'None';
+
+    const notes = document.getElementById('notes').value.trim();
+
+    let text = '*Ameerul Iskandar - Booking Enquiry*\n\n';
+    text += '*Personal Details*\n';
+    text += 'Name: ' + fullName + '\n';
+    text += 'Email: ' + email + '\n';
+    text += 'Phone: ' + phone + '\n';
+    if (company) text += 'Company: ' + company + '\n';
+
+    text += '\n*Event Details*\n';
+    text += 'Type: ' + eventType + '\n';
+    text += 'Venue: ' + venue + '\n';
+    text += 'Date: ' + eventDate + '\n';
+    text += 'Time: ' + eventTime + '\n';
+    text += 'Duration: ' + duration + '\n';
+
+    text += '\n*Package & Add-ons*\n';
+    text += 'Package: ' + packageName + '\n';
+    text += 'Add-ons: ' + addonsText + '\n';
+
+    if (notes) {
+      text += '\n*Additional Notes*\n' + notes;
+    }
+
+    const waNumber = '60162275267';
+    const encodedText = encodeURIComponent(text);
+    const whatsappUrl = 'https://wa.me/' + waNumber + '?text=' + encodedText;
+
+    // Redirect immediately to WhatsApp
+    window.location.href = whatsappUrl;
   });
 })();
