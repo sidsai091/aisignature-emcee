@@ -664,7 +664,7 @@ p { font-size: 1rem; color: var(--text-light); }
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
-  align-items: start;
+  align-items: stretch;
 }
 .package-card {
   background: var(--bg-card);
@@ -672,6 +672,8 @@ p { font-size: 1rem; color: var(--text-light); }
   border-radius: var(--radius);
   padding: 2.5rem 2rem;
   position: relative;
+  display: flex;
+  flex-direction: column;
   transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
 }
 .package-card:hover {
@@ -725,7 +727,7 @@ p { font-size: 1rem; color: var(--text-light); }
   font-weight: 700;
   color: var(--gold);
 }
-.package-features { margin: 1.2rem 0 1.8rem; }
+.package-features { margin: 1.2rem 0 1.8rem; flex-grow: 1; }
 .package-features li {
   display: flex;
   align-items: flex-start;
