@@ -37,7 +37,7 @@ function initRevenueChart(canvasId, labels, values) {
     data: {
       labels: labels,
       datasets: [{
-        label: 'Revenue (USD)',
+        label: 'Revenue (RM)',
         data: values,
         backgroundColor: goldBg,
         borderColor: gold,
@@ -61,7 +61,7 @@ function initRevenueChart(canvasId, labels, values) {
           padding: 10,
           callbacks: {
             label: function(ctx) {
-              return ' $' + ctx.parsed.y.toLocaleString();
+              return ' RM' + ctx.parsed.y.toLocaleString();
             }
           }
         }
@@ -76,7 +76,7 @@ function initRevenueChart(canvasId, labels, values) {
           ticks: {
             color: muted,
             font: { size: 11 },
-            callback: function(v) { return '$' + v.toLocaleString(); }
+            callback: function(v) { return 'RM' + v.toLocaleString(); }
           },
           beginAtZero: true
         }

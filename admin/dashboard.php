@@ -32,7 +32,7 @@ foreach ($revenue as $m => $v) {
 }
 
 // Recent bookings (last 5)
-$recent = array_slice(array_reverse($all), 0, 5);
+$recent = array_slice($all, 0, 5);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -103,7 +103,7 @@ $recent = array_slice(array_reverse($all), 0, 5);
           </svg>
         </div>
         <div class="stat-body">
-          <div class="stat-num">$<?= number_format($stats['monthRevenue']) ?></div>
+          <div class="stat-num">RM<?= number_format($stats['monthRevenue']) ?></div>
           <div class="stat-label">Revenue This Month</div>
         </div>
       </div>

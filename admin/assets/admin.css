@@ -6,27 +6,27 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600&display=swap');
 
 :root {
-  --bg:          #090d1a;
-  --bg-card:     #0f1629;
-  --bg-input:    #0b0f1e;
-  --bg-hover:    #131929;
+  --bg:          #fcfbf7;
+  --bg-card:     #ffffff;
+  --bg-input:    #ffffff;
+  --bg-hover:    #f4f1ea;
   --sidebar-w:   240px;
   --topbar-h:    60px;
-  --gold:        #c9a84c;
-  --gold-light:  #e2c06e;
-  --gold-dark:   #a07a2e;
-  --white:       #ffffff;
-  --text:        #d0d5e8;
-  --muted:       #7b85a3;
-  --border:      rgba(201,168,76,0.15);
-  --border-soft: rgba(255,255,255,0.06);
+  --gold:        #b8860b;
+  --gold-light:  #d4a017;
+  --gold-dark:   #8b6508;
+  --white:       #1a1a1a; /* Used as primary heading color */
+  --text:        #2d2d2d;
+  --muted:       #7a7060;
+  --border:      rgba(184,134,11,0.12);
+  --border-soft: rgba(0,0,0,0.05);
   --radius:      8px;
   --trans:       0.25s ease;
 
-  --green:   #2ecc71;
-  --yellow:  #f0b429;
-  --red:     #e05050;
-  --blue:    #4a9eff;
+  --green:   #27ae60;
+  --yellow:  #f39c12;
+  --red:     #e74c3c;
+  --blue:    #3498db;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -61,7 +61,7 @@ input, select, textarea, button { font-family: inherit; }
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 2.5rem 2.25rem;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  box-shadow: 0 20px 50px rgba(184,134,11,0.08);
 }
 .login-logo {
   font-family: 'Playfair Display', serif;
@@ -203,8 +203,8 @@ input, select, textarea, button { font-family: inherit; }
   transition: background var(--trans), color var(--trans);
   cursor: pointer;
 }
-.nav-item:hover { background: var(--bg-hover); color: var(--white); }
-.nav-item.active { background: rgba(201,168,76,0.12); color: var(--gold); }
+.nav-item:hover { background: var(--bg-hover); color: var(--gold); }
+.nav-item.active { background: #fdfaf3; border: 1px solid var(--border); color: var(--gold); }
 .nav-item svg { flex-shrink: 0; }
 .sidebar-bottom { padding: 0 0.75rem; display: flex; flex-direction: column; gap: 0.2rem; }
 .nav-logout { color: var(--red) !important; opacity: 0.8; }
@@ -348,10 +348,10 @@ input, select, textarea, button { font-family: inherit; }
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
-.icon-total    { background: rgba(74,158,255,0.12); color: var(--blue); }
-.icon-pending  { background: rgba(240,180,41,0.12); color: var(--yellow); }
-.icon-confirmed{ background: rgba(46,204,113,0.12); color: var(--green); }
-.icon-revenue  { background: rgba(201,168,76,0.12); color: var(--gold); }
+.icon-total    { background: #eef6ff; color: var(--blue); }
+.icon-pending  { background: #fff7e6; color: var(--yellow); }
+.icon-confirmed{ background: #effaf3; color: var(--green); }
+.icon-revenue  { background: #fdfaf3; color: var(--gold); }
 .stat-num {
   font-family: 'Playfair Display', serif;
   font-size: 1.6rem;
@@ -455,13 +455,14 @@ input, select, textarea, button { font-family: inherit; }
   font-size: 0.85rem;
 }
 .data-table th {
-  padding: 0.75rem 1.25rem;
+  padding: 0.85rem 1.25rem;
   text-align: left;
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
+  background: #fdfaf3;
   border-bottom: 1px solid var(--border);
   white-space: nowrap;
 }
@@ -539,8 +540,8 @@ input, select, textarea, button { font-family: inherit; }
   font-size: 0.88rem;
   margin-bottom: 1.25rem;
 }
-.alert-error   { background: rgba(224,80,80,0.1);  border: 1px solid rgba(224,80,80,0.3);  color: #f08080; }
-.alert-success { background: rgba(46,204,113,0.1); border: 1px solid rgba(46,204,113,0.3); color: #6ee09e; }
+.alert-error   { background: #fff1f0; border: 1px solid rgba(231,76,60,0.2); color: #c0392b; }
+.alert-success { background: #f6ffed; border: 1px solid rgba(39,174,96,0.2); color: #27ae60; }
 
 /* ================================================
    FILTERS
@@ -791,6 +792,37 @@ input, select, textarea, button { font-family: inherit; }
 .qa-btn:hover { border-color: rgba(201,168,76,0.4); color: var(--gold); background: var(--bg-hover); }
 .qa-btn-neutral { color: var(--muted); }
 .qa-btn-neutral:hover { color: var(--text); }
+
+.qa-btn-danger {
+  border-color: rgba(255,71,87,0.3);
+  color: #ff4757;
+  background: rgba(255,71,87,0.05);
+}
+.qa-btn-danger:hover {
+  border-color: rgba(255,71,87,0.6);
+  color: #ff6b7a;
+  background: rgba(255,71,87,0.12);
+}
+
+/* Alerts */
+.alert-success {
+  background: rgba(46,213,115,0.08);
+  border: 1px solid rgba(46,213,115,0.25);
+  color: #2ed573;
+  padding: 0.85rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  margin-bottom: 1.5rem;
+}
+.alert-info {
+  background: rgba(30,144,255,0.08);
+  border: 1px solid rgba(30,144,255,0.25);
+  color: #5b9dff;
+  padding: 0.85rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  margin-bottom: 1.5rem;
+}
 
 /* ================================================
    RESPONSIVE

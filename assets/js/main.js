@@ -210,15 +210,15 @@
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener('input', function () {
-      const errorId = id + 'Error';
+      var errorId = id + 'Error';
       // Re-validate only this field on blur/input
       el.classList.remove('error');
-      const err = document.getElementById(errorId);
+      var err = document.getElementById(errorId);
       if (err) err.classList.remove('visible');
     });
     el.addEventListener('change', function () {
       el.classList.remove('error');
-      const err = document.getElementById(id + 'Error');
+      var err = document.getElementById(id + 'Error');
       if (err) err.classList.remove('visible');
     });
   });
@@ -228,57 +228,65 @@
 
     if (!validateForm()) {
       // Scroll to first error
-      const firstError = form.querySelector('.error, input[name="package"]');
+      var firstError = form.querySelector('.error, input[name="package"]');
       if (firstError) {
         firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
       return;
     }
 
-    // Simulate submission (replace with real fetch/API call as needed)
-    const submitBtn = document.getElementById('submitBtn');
+    var submitBtn = document.getElementById('submitBtn');
     if (submitBtn) {
-      submitBtn.textContent = 'Redirecting...';
+      submitBtn.textContent = 'Submitting...';
       submitBtn.disabled = true;
     }
 
     // Gather booking details
-    const fullName = document.getElementById('fullName').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const phone = document.getElementById('phone').value.trim();
+    var fullName = document.getElementById('fullName').value.trim();
+    var email = document.getElementById('email').value.trim();
+    var phone = document.getElementById('phone').value.trim();
 
-    const companyInput = document.getElementById('company');
-    const company = companyInput ? companyInput.value.trim() : '';
+    var companyInput = document.getElementById('company');
+    var company = companyInput ? companyInput.value.trim() : '';
 
     function getSelectedText(selectId) {
-      const el = document.getElementById(selectId);
+      var el = document.getElementById(selectId);
       return el && el.selectedIndex > 0 ? el.options[el.selectedIndex].text : '';
     }
 
-    const eventType = getSelectedText('eventType');
-    const venue = document.getElementById('venue').value.trim();
-    const eventDate = document.getElementById('eventDate').value;
-    const eventTime = document.getElementById('eventTime').value;
-    const duration = getSelectedText('duration');
+    function getSelectedValue(selectId) {
+      var el = document.getElementById(selectId);
+      return el ? el.value : '';
+    }
 
-    const packageEl = document.querySelector('input[name="package"]:checked');
-    const pkg = packageEl ? packageEl.value : '';
-    let packageName = pkg;
+    var eventType = getSelectedText('eventType');
+    var venue = document.getElementById('venue').value.trim();
+    var eventDate = document.getElementById('eventDate').value;
+    var eventTime = document.getElementById('eventTime').value;
+    var durationText = getSelectedText('duration');
+    var durationValue = getSelectedValue('duration');
+
+    var packageEl = document.querySelector('input[name="package"]:checked');
+    var pkg = packageEl ? packageEl.value : '';
+    var packageName = pkg;
     if (pkg === 'basic') packageName = 'Package Kahwin A (RM550)';
     else if (pkg === 'standard') packageName = 'Package Kahwin B (RM750)';
     else if (pkg === 'premium') packageName = 'Open Event (RM150/hr)';
 
-    const addonsElements = document.querySelectorAll('input[name="addons"]:checked');
-    let addons = [];
+    var addonsElements = document.querySelectorAll('input[name="addons"]:checked');
+    var addons = [];
+    var addonsValues = [];
     addonsElements.forEach(function (el) {
+      addonsValues.push(el.value);
       if (el.value === 'coordinator') addons.push('Event Coordinator / Floor Manager');
       if (el.value === 'djcrew') addons.push('DJ Crew');
     });
-    const addonsText = addons.length > 0 ? addons.join(', ') : 'None';
+    var addonsText = addons.length > 0 ? addons.join(', ') : 'None';
 
-    const notes = document.getElementById('notes').value.trim();
+    var notes = document.getElementById('notes').value.trim();
 
-    let text = '*Ameerul Iskandar - Booking Enquiry*\n\n';
+    // Build WhatsApp message
+    var text = '*Ameerul Iskandar - Booking Enquiry*\n\n';
     text += '*Personal Details*\n';
     text += 'Name: ' + fullName + '\n';
     text += 'Email: ' + email + '\n';
@@ -290,7 +298,7 @@
     text += 'Venue: ' + venue + '\n';
     text += 'Date: ' + eventDate + '\n';
     text += 'Time: ' + eventTime + '\n';
-    text += 'Duration: ' + duration + '\n';
+    text += 'Duration: ' + durationText + '\n';
 
     text += '\n*Package & Add-ons*\n';
     text += 'Package: ' + packageName + '\n';
@@ -300,11 +308,40 @@
       text += '\n*Additional Notes*\n' + notes;
     }
 
-    const waNumber = '60162275267';
-    const encodedText = encodeURIComponent(text);
-    const whatsappUrl = 'https://wa.me/' + waNumber + '?text=' + encodedText;
+    var waNumber = '60162275267';
+    var encodedText = encodeURIComponent(text);
+    var whatsappUrl = 'https://wa.me/' + waNumber + '?text=' + encodedText;
 
-    // Redirect immediately to WhatsApp
-    window.location.href = whatsappUrl;
+    // Save booking to database via API, then redirect to WhatsApp
+    var apiData = {
+      fullName: fullName,
+      email: email,
+      phone: phone,
+      company: company,
+      eventType: eventType,
+      venue: venue,
+      eventDate: eventDate,
+      eventTime: eventTime,
+      duration: durationValue,
+      package: pkg,
+      addons: addonsValues.join(', '),
+      notes: notes
+    };
+
+    fetch('api/booking.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(apiData)
+    })
+    .then(function(response) { return response.json(); })
+    .then(function(data) {
+      // Redirect to WhatsApp after saving
+      window.location.href = whatsappUrl;
+    })
+    .catch(function(err) {
+      // Even if API fails, still redirect to WhatsApp
+      console.error('Booking API error:', err);
+      window.location.href = whatsappUrl;
+    });
   });
 })();

@@ -12,21 +12,28 @@ if (!$booking) {
 
 $statuses  = ['Pending','Confirmed','Completed','Cancelled'];
 $saved     = false;
-$savedNote = $booking['notes'];
+$deleted   = false;
 
-// Handle form submit (UI only — simulate save)
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+// Handle delete
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete') {
+    delete_booking($id);
+    header('Location: bookings.php?deleted=1');
+    exit;
+}
+
+// Handle status/notes update
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
     $newStatus = $_POST['status'] ?? $booking['status'];
     $newNote   = trim($_POST['notes'] ?? '');
     if (in_array($newStatus, $statuses)) {
-        $booking['status'] = $newStatus;
+        update_booking($id, $newStatus, $newNote);
+        // Refresh booking data
+        $booking = get_booking_by_id($id);
     }
-    $savedNote       = $newNote;
-    $booking['notes']= $newNote;
     $saved = true;
 }
 
-$packagePrices = ['Basic'=>800, 'Standard'=>1500, 'Premium'=>2800];
+$packagePrices = ['Basic'=>550, 'Standard'=>750, 'Premium'=>150];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -138,10 +145,25 @@ $packagePrices = ['Basic'=>800, 'Standard'=>1500, 'Premium'=>2800];
                 <div class="df-label">Package</div>
                 <div class="df-value">
                   <span class="pkg-tag pkg-tag-lg"><?= $booking['package'] ?></span>
-                  <span class="df-price">from $<?= number_format($packagePrices[$booking['package']] ?? 0) ?></span>
                 </div>
               </div>
             </div>
+            <?php if (!empty($booking['addons'])): ?>
+            <div class="detail-row">
+              <div class="detail-field">
+                <div class="df-label">Add-ons</div>
+                <div class="df-value"><?= htmlspecialchars($booking['addons']) ?></div>
+              </div>
+            </div>
+            <?php endif; ?>
+            <?php if (!empty($booking['client_notes'])): ?>
+            <div class="detail-row">
+              <div class="detail-field" style="flex:1;">
+                <div class="df-label">Client Notes</div>
+                <div class="df-value"><?= nl2br(htmlspecialchars($booking['client_notes'])) ?></div>
+              </div>
+            </div>
+            <?php endif; ?>
           </div>
         </div>
 
@@ -175,7 +197,7 @@ $packagePrices = ['Basic'=>800, 'Standard'=>1500, 'Premium'=>2800];
 
             <div class="form-group" style="margin-top:1.5rem;">
               <label>Internal Notes</label>
-              <textarea name="notes" rows="6" class="admin-textarea" placeholder="Add private notes for admin use only…"><?= htmlspecialchars($savedNote) ?></textarea>
+              <textarea name="notes" rows="6" class="admin-textarea" placeholder="Add private notes for admin use only…"><?= htmlspecialchars($booking['notes']) ?></textarea>
               <p class="field-hint">These notes are not visible to the client.</p>
             </div>
 
@@ -194,12 +216,28 @@ $packagePrices = ['Basic'=>800, 'Standard'=>1500, 'Premium'=>2800];
               </svg>
               Email Client
             </a>
+            <a href="https://wa.me/<?= preg_replace('/[^0-9]/', '', $booking['phone']) ?>" target="_blank" class="qa-btn">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6 19.8 19.8 0 01-3.1-8.7A2 2 0 014.1 2h3a2 2 0 012 1.7 12.7 12.7 0 00.7 2.8 2 2 0 01-.5 2.1L8 9.9a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.5c.9.3 1.8.5 2.8.7A2 2 0 0122 16.9z"/>
+              </svg>
+              WhatsApp Client
+            </a>
             <a href="tel:<?= htmlspecialchars($booking['phone']) ?>" class="qa-btn">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                 <path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6 19.8 19.8 0 01-3.1-8.7A2 2 0 014.1 2h3a2 2 0 012 1.7 12.7 12.7 0 00.7 2.8 2 2 0 01-.5 2.1L8 9.9a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.5c.9.3 1.8.5 2.8.7A2 2 0 0122 16.9z"/>
               </svg>
               Call Client
             </a>
+            <form method="POST" action="booking-detail.php?id=<?= $booking['id'] ?>" onsubmit="return confirm('Are you sure you want to delete this booking? This action cannot be undone.');" style="width:100%;">
+              <input type="hidden" name="action" value="delete"/>
+              <button type="submit" class="qa-btn qa-btn-danger" style="width:100%;border:none;cursor:pointer;text-align:left;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                  <line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>
+                </svg>
+                Delete Booking
+              </button>
+            </form>
             <a href="bookings.php" class="qa-btn qa-btn-neutral">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                 <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
