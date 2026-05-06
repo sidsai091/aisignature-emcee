@@ -22,6 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 require_once __DIR__ . '/../admin/includes/db.php';
+require_once __DIR__ . '/../admin/includes/data.php';
 
 // Parse JSON body
 $input = json_decode(file_get_contents('php://input'), true);
@@ -79,28 +80,7 @@ if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $data['date'])) {
 }
 
 try {
-    $db = get_db();
-    $stmt = $db->prepare(
-        'INSERT INTO bookings (name, email, phone, company, event_type, date, time, venue, duration, package, addons, notes, status)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-    );
-    $stmt->execute([
-        $data['name'],
-        $data['email'],
-        $data['phone'],
-        $data['company'],
-        $data['event_type'],
-        $data['date'],
-        $data['time'],
-        $data['venue'],
-        $data['duration'],
-        $data['package'],
-        $data['addons'],
-        $data['notes'],
-        'Pending',
-    ]);
-
-    $bookingId = $db->lastInsertId();
+    $bookingId = insert_booking($data);
 
     echo json_encode([
         'status'     => 'ok',
@@ -108,7 +88,7 @@ try {
         'booking_id' => $bookingId,
     ]);
 
-} catch (PDOException $e) {
+} catch (Exception $e) {
     http_response_code(500);
     echo json_encode(['status' => 'error', 'message' => 'Database error: ' . $e->getMessage()]);
 }

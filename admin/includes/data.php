@@ -27,6 +27,7 @@ function get_bookings() {
             'venue'      => $row['venue'],
             'duration'   => $row['duration'],
             'package'    => ucfirst($row['package']),
+            'price'      => (float)$row['price'],
             'addons'     => $row['addons'] ?? '',
             'notes'      => $row['admin_notes'] ?? '',
             'client_notes' => $row['notes'] ?? '',
@@ -59,6 +60,7 @@ function get_booking_by_id($id) {
         'venue'      => $row['venue'],
         'duration'   => $row['duration'],
         'package'    => ucfirst($row['package']),
+        'price'      => (float)$row['price'],
         'addons'     => $row['addons'] ?? '',
         'notes'      => $row['admin_notes'] ?? '',
         'client_notes' => $row['notes'] ?? '',
@@ -68,12 +70,17 @@ function get_booking_by_id($id) {
 }
 
 /**
- * Update a booking's status and admin notes.
+ * Update a booking's status, admin notes, and price.
  */
-function update_booking($id, $status, $admin_notes) {
+function update_booking($id, $status, $admin_notes, $price = null) {
     $db = get_db();
-    $stmt = $db->prepare('UPDATE bookings SET status = ?, admin_notes = ? WHERE id = ?');
-    return $stmt->execute([$status, $admin_notes, (int)$id]);
+    if ($price !== null) {
+        $stmt = $db->prepare('UPDATE bookings SET status = ?, admin_notes = ?, price = ? WHERE id = ?');
+        return $stmt->execute([$status, $admin_notes, (float)$price, (int)$id]);
+    } else {
+        $stmt = $db->prepare('UPDATE bookings SET status = ?, admin_notes = ? WHERE id = ?');
+        return $stmt->execute([$status, $admin_notes, (int)$id]);
+    }
 }
 
 /**
@@ -90,9 +97,37 @@ function delete_booking($id) {
  */
 function insert_booking($data) {
     $db = get_db();
+    
+    // Calculate initial price
+    $packagePrices = ['basic'=>550, 'standard'=>750, 'premium'=>150];
+    $pkg = strtolower($data['package']);
+    $price = 0;
+    
+    // 1. Base Package Price
+    if ($pkg === 'premium') {
+        $hours = match($data['duration']) {
+            '2hrs'    => 2,
+            '4hrs'    => 4,
+            'fullday' => 8,
+            default   => 2,
+        };
+        $price = 150 * $hours;
+    } else {
+        $price = $packagePrices[$pkg] ?? 0;
+    }
+
+    // 2. Add-ons Price
+    $addons = $data['addons'] ?? '';
+    if (stripos($addons, 'coordinator') !== false) {
+        $price += 300;
+    }
+    if (stripos($addons, 'djcrew') !== false) {
+        $price += 500;
+    }
+
     $stmt = $db->prepare(
-        'INSERT INTO bookings (name, email, phone, company, event_type, date, time, venue, duration, package, addons, notes, status)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        'INSERT INTO bookings (name, email, phone, company, event_type, date, time, venue, duration, package, price, addons, notes, status)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
     );
     $stmt->execute([
         $data['name'],
@@ -105,6 +140,7 @@ function insert_booking($data) {
         $data['venue'],
         $data['duration'],
         $data['package'],
+        $price,
         $data['addons'] ?? '',
         $data['notes'] ?? '',
         'Pending',
@@ -134,33 +170,15 @@ function get_stats() {
         };
     }
 
-    // Monthly revenue: sum package prices for confirmed+completed bookings this month
-    $packagePrices = ['basic'=>550, 'standard'=>750, 'premium'=>150];
-
+    // Monthly revenue: sum price column for confirmed+completed bookings this month
     $stmt = $db->prepare(
-        "SELECT package, duration FROM bookings
+        "SELECT SUM(price) as revenue FROM bookings
          WHERE DATE_FORMAT(date, '%Y-%m') = ?
          AND status IN ('Confirmed','Completed')"
     );
     $stmt->execute([$thisMonth]);
-    $monthBookings = $stmt->fetchAll();
-
-    $monthRevenue = 0;
-    foreach ($monthBookings as $b) {
-        $pkg = strtolower($b['package']);
-        if ($pkg === 'premium') {
-            // RM150/hr — estimate from duration
-            $hours = match($b['duration']) {
-                '2hrs'    => 2,
-                '4hrs'    => 4,
-                'fullday' => 8,
-                default   => 2,
-            };
-            $monthRevenue += 150 * $hours;
-        } else {
-            $monthRevenue += $packagePrices[$pkg] ?? 0;
-        }
-    }
+    $res = $stmt->fetch();
+    $monthRevenue = (float)($res['revenue'] ?? 0);
 
     return compact('total','pending','confirmed','completed','cancelled','monthRevenue');
 }
@@ -170,33 +188,19 @@ function get_stats() {
  */
 function get_monthly_revenue() {
     $db = get_db();
-    $packagePrices = ['basic'=>550, 'standard'=>750, 'premium'=>150];
-
     $stmt = $db->query(
-        "SELECT DATE_FORMAT(date, '%Y-%m') as month, package, duration
+        "SELECT DATE_FORMAT(date, '%Y-%m') as month, SUM(price) as revenue
          FROM bookings
          WHERE status IN ('Confirmed','Completed')
-         ORDER BY date"
+         GROUP BY month
+         ORDER BY month"
     );
     $rows = $stmt->fetchAll();
-
+    
     $months = [];
-    foreach ($rows as $b) {
-        $m = $b['month'];
-        $pkg = strtolower($b['package']);
-        if ($pkg === 'premium') {
-            $hours = match($b['duration']) {
-                '2hrs'    => 2,
-                '4hrs'    => 4,
-                'fullday' => 8,
-                default   => 2,
-            };
-            $months[$m] = ($months[$m] ?? 0) + (150 * $hours);
-        } else {
-            $months[$m] = ($months[$m] ?? 0) + ($packagePrices[$pkg] ?? 0);
-        }
+    foreach ($rows as $row) {
+        $months[$row['month']] = (float)$row['revenue'];
     }
-    ksort($months);
     return $months;
 }
 

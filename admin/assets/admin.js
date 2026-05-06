@@ -27,10 +27,11 @@ function initRevenueChart(canvasId, labels, values) {
   const canvas = document.getElementById(canvasId);
   if (!canvas || typeof Chart === 'undefined') return;
 
-  const gold    = '#c9a84c';
-  const goldBg  = 'rgba(201,168,76,0.08)';
-  const muted   = '#7b85a3';
-  const border  = 'rgba(201,168,76,0.15)';
+  const gold    = '#b8860b';
+  const goldBg  = 'rgba(184,134,11,0.1)';
+  const text    = '#2d2d2d';
+  const muted   = '#7a7060';
+  const border  = 'rgba(184,134,11,0.15)';
 
   new Chart(canvas, {
     type: 'bar',
@@ -44,7 +45,7 @@ function initRevenueChart(canvasId, labels, values) {
         borderWidth: 1.5,
         borderRadius: 5,
         borderSkipped: false,
-        hoverBackgroundColor: 'rgba(201,168,76,0.18)',
+        hoverBackgroundColor: 'rgba(184,134,11,0.2)',
       }]
     },
     options: {
@@ -53,11 +54,11 @@ function initRevenueChart(canvasId, labels, values) {
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: '#0f1629',
+          backgroundColor: '#ffffff',
           borderColor: border,
           borderWidth: 1,
           titleColor: gold,
-          bodyColor: muted,
+          bodyColor: text,
           padding: 10,
           callbacks: {
             label: function(ctx) {
@@ -68,11 +69,11 @@ function initRevenueChart(canvasId, labels, values) {
       },
       scales: {
         x: {
-          grid: { color: 'rgba(255,255,255,0.03)' },
+          grid: { color: 'rgba(0,0,0,0.03)' },
           ticks: { color: muted, font: { size: 11 } }
         },
         y: {
-          grid: { color: 'rgba(255,255,255,0.04)' },
+          grid: { color: 'rgba(0,0,0,0.04)' },
           ticks: {
             color: muted,
             font: { size: 11 },

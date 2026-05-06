@@ -178,6 +178,7 @@ $recent = array_slice($all, 0, 5);
               <th>Event Type</th>
               <th>Date</th>
               <th>Package</th>
+              <th>Price</th>
               <th>Status</th>
               <th></th>
             </tr>
@@ -193,6 +194,7 @@ $recent = array_slice($all, 0, 5);
               <td><?= htmlspecialchars($b['event_type']) ?></td>
               <td><?= date('d M Y', strtotime($b['date'])) ?></td>
               <td><span class="pkg-tag"><?= $b['package'] ?></span></td>
+              <td style="font-weight:600; color:var(--gold);">RM<?= number_format($b['price'], 2) ?></td>
               <td><span class="badge <?= status_class($b['status']) ?>"><?= $b['status'] ?></span></td>
               <td><a href="booking-detail.php?id=<?= $b['id'] ?>" class="tbl-btn">View</a></td>
             </tr>

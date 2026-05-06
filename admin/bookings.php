@@ -128,6 +128,7 @@ $statuses = ['Pending','Confirmed','Completed','Cancelled'];
               <th>Event Date</th>
               <th>Package</th>
               <th>Duration</th>
+              <th>Price</th>
               <th>Status</th>
               <th>Submitted</th>
               <th></th>
@@ -148,7 +149,8 @@ $statuses = ['Pending','Confirmed','Completed','Cancelled'];
                 <div class="td-sub"><?= $b['time'] ?></div>
               </td>
               <td><span class="pkg-tag"><?= $b['package'] ?></span></td>
-              <td class="td-muted"><?= $b['duration'] === 'fullday' ? 'Full Day' : $b['duration'] ?></td>
+              <td><?= $b['duration'] === 'fullday' ? 'Full Day' : $b['duration'] ?></td>
+              <td style="font-weight:600; color:var(--gold);">RM<?= number_format($b['price'], 2) ?></td>
               <td><span class="badge <?= status_class($b['status']) ?>"><?= $b['status'] ?></span></td>
               <td class="td-muted"><?= date('d M', strtotime($b['created'])) ?></td>
               <td><a href="booking-detail.php?id=<?= $b['id'] ?>" class="tbl-btn">View</a></td>

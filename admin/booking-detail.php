@@ -25,8 +25,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
     $newStatus = $_POST['status'] ?? $booking['status'];
     $newNote   = trim($_POST['notes'] ?? '');
+    $newPrice  = isset($_POST['price']) ? (float)$_POST['price'] : $booking['price'];
     if (in_array($newStatus, $statuses)) {
-        update_booking($id, $newStatus, $newNote);
+        update_booking($id, $newStatus, $newNote, $newPrice);
         // Refresh booking data
         $booking = get_booking_by_id($id);
     }
@@ -143,8 +144,9 @@ $packagePrices = ['Basic'=>550, 'Standard'=>750, 'Premium'=>150];
               </div>
               <div class="detail-field">
                 <div class="df-label">Package</div>
-                <div class="df-value">
+                <div class="df-value" style="display:flex; align-items:center; gap:0.75rem;">
                   <span class="pkg-tag pkg-tag-lg"><?= $booking['package'] ?></span>
+                  <span style="font-weight:700; color:var(--gold); font-size:1.1rem;">RM<?= number_format($booking['price'], 2) ?></span>
                 </div>
               </div>
             </div>
@@ -193,6 +195,11 @@ $packagePrices = ['Basic'=>550, 'Standard'=>750, 'Premium'=>150];
               <div><span class="badge badge-confirmed">Confirmed</span> Booking confirmed</div>
               <div><span class="badge badge-completed">Completed</span> Event done</div>
               <div><span class="badge badge-cancelled">Cancelled</span> Booking cancelled</div>
+            </div>
+
+            <div class="form-group" style="margin-top:1.5rem;">
+              <label>Booking Price (RM)</label>
+              <input type="number" step="0.01" name="price" class="admin-select" value="<?= $booking['price'] ?>" style="background-image:none; padding-right:0.9rem;">
             </div>
 
             <div class="form-group" style="margin-top:1.5rem;">
